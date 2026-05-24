@@ -1,0 +1,238 @@
+@extends('layouts.app')
+
+@section('content')
+@php
+    $game = $room->latestGame;
+    $initialPlayers = collect($game?->players ?? [])->map(function ($player) use ($room) {
+        return [
+            'user_id' => $player->user_id,
+            'user' => ['username' => $player->user->username],
+            'is_host' => $player->user_id === $room->host_id,
+        ];
+    })->values();
+
+    if (!$initialPlayers->contains('user_id', $room->host_id)) {
+        $initialPlayers->prepend([
+        'user_id' => $room->host_id,
+        'user' => ['username' => $room->host->username],
+        'is_host' => true,
+        ]);
+    }
+@endphp
+
+<script>
+window.__ROOM_PLAYERS = @json($initialPlayers);
+window.__ROOM_HOST_ID = {{ $room->host_id }};
+window.__ROOM_ID = {{ $room->id }};
+</script>
+<section class="grid gap-6 lg:grid-cols-[1fr_320px]">
+    <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div class="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+            <div>
+                <h1 class="text-3xl font-black">{{ $room->name }}</h1>
+                <p class="mt-2 text-slate-400">Hosted by {{ $room->host->username }} · {{ str_replace('_', ' ', $room->status) }}</p>
+            </div>
+            @if ($game && $room->status !== 'waiting')
+                <a href="{{ route('games.show', $game) }}" class="rounded-xl bg-cyan-400 px-4 py-2 font-bold text-slate-950">Enter Game</a>
+            @endif
+        </div>
+
+        <div id="room-players" class="mt-8 grid gap-3 sm:grid-cols-2">
+            @foreach ($initialPlayers as $player)
+                <div class="rounded-xl border border-slate-800 bg-slate-950 p-4" data-player-id="{{ $player['user_id'] }}">
+                    <p class="font-semibold">{{ $player['user']['username'] }}</p>
+                    <p class="text-sm text-slate-500">{{ $player['is_host'] ? 'Host' : 'Player' }}</p>
+                </div>
+            @endforeach
+        </div>
+
+        <div id="room-players-empty" class="mt-8 hidden text-center text-slate-500">
+            <p>Waiting for players to join...</p>
+        </div>
+    </div>
+
+    <aside class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <h2 class="text-xl font-bold">Actions</h2>
+        <div class="mt-5 space-y-3">
+            @if ($room->status === 'waiting')
+                @if (!$game?->players?->contains('user_id', auth()->id()))
+                    <form method="POST" action="{{ route('rooms.join', $room) }}">@csrf<button class="w-full rounded-xl bg-cyan-400 px-4 py-3 font-bold text-slate-950">Join Room</button></form>
+                @endif
+                @if ($room->host_id === auth()->id())
+                    <form method="POST" action="{{ route('games.store', $room) }}">@csrf<button class="w-full rounded-xl bg-emerald-400 px-4 py-3 font-bold text-slate-950">Start Game</button></form>
+                @endif
+            @endif
+            <form method="POST" action="{{ route('rooms.leave', $room) }}">@csrf<button class="w-full rounded-xl border border-slate-700 px-4 py-3 font-bold text-slate-200">Leave Room</button></form>
+            @if ($room->host_id === auth()->id())
+                <form method="POST" action="{{ route('rooms.destroy', $room) }}">@csrf @method('DELETE')<button class="w-full rounded-xl border border-red-800 px-4 py-3 font-bold text-red-300">Delete Room</button></form>
+            @endif
+        </div>
+    </aside>
+</section>
+
+<script>
+(() => {
+    const playersContainer = document.getElementById('room-players');
+    const emptyState = document.getElementById('room-players-empty');
+    let currentPlayers = (window.__ROOM_PLAYERS || []).map(p => ({
+        user_id: Number(p.user_id),
+        user: { username: p.user?.username ?? '' },
+        is_host: Boolean(p.is_host),
+    }));
+    let pollingInterval = null;
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>'"]/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#039;',
+            '"': '&quot;'
+        }[char]));
+    }
+
+    function renderPlayers() {
+        playersContainer.innerHTML = currentPlayers.map((player) => `
+            <div class="rounded-xl border border-slate-800 bg-slate-950 p-4" data-player-id="${player.user_id}">
+                <p class="font-semibold">${escapeHtml(player.user.username)}</p>
+                <p class="text-sm text-slate-500">${player.is_host ? 'Host' : 'Player'}</p>
+            </div>
+        `).join('');
+
+        emptyState.classList.toggle('hidden', currentPlayers.length > 0);
+    }
+
+    function findPlayer(userId) {
+        return currentPlayers.find(p => Number(p.user_id) === Number(userId));
+    }
+
+    function addPlayer(player) {
+        const userId = Number(player?.id ?? player?.user_id ?? player?.user?.id);
+        if (!Number.isFinite(userId)) return;
+        if (findPlayer(userId)) return;
+
+        currentPlayers.push({
+            user_id: userId,
+            user: { username: player?.username ?? player?.user?.username ?? '' },
+            is_host: Boolean(player?.is_host ?? player?.user?.is_host ?? userId === window.__ROOM_HOST_ID),
+        });
+        renderPlayers();
+    }
+
+    function removePlayer(player) {
+        const userId = Number(player?.id ?? player?.user_id ?? player?.user?.id);
+        if (!Number.isFinite(userId)) return;
+        currentPlayers = currentPlayers.filter(p => Number(p.user_id) !== userId);
+        renderPlayers();
+    }
+
+    function checkRoomStatus() {
+        const roomId = window.__ROOM_ID;
+        if (!roomId) return;
+
+        fetch(`/rooms/${roomId}/status?_=${Date.now()}`, {
+            credentials: 'include',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (data && data.status === 'in_progress' && data.game_id) {
+                window.location.href = `/games/${data.game_id}`;
+            }
+        })
+        .catch(() => {});
+    }
+
+    function startPolling() {
+        const roomId = window.__ROOM_ID;
+        if (!roomId) return;
+
+        const poll = () => {
+            fetch(`/rooms/${roomId}/players?_=${Date.now()}`, {
+                credentials: 'include',
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.ok ? r.json() : null)
+            .then(players => {
+                if (!players || !Array.isArray(players)) return;
+
+                const serverIds = new Set(players.map(p => Number(p.user_id ?? p.id)));
+                const currentIds = new Set(currentPlayers.map(p => Number(p.user_id)));
+                const merged = players.map(p => ({
+                    user_id: Number(p.user_id ?? p.id),
+                    user: { username: p.user?.username ?? p.username ?? '' },
+                    is_host: Boolean(p.is_host ?? Number(p.user_id ?? p.id) === window.__ROOM_HOST_ID),
+                }));
+
+                const hasChanges =
+                    merged.length !== currentPlayers.length ||
+                    merged.some(p => !currentIds.has(p.user_id)) ||
+                    currentPlayers.some(p => !serverIds.has(p.user_id));
+
+                if (hasChanges) {
+                    currentPlayers = merged;
+                    renderPlayers();
+                }
+            })
+            .catch(() => {});
+            
+            // Also check room status for game start
+            checkRoomStatus();
+        };
+
+        poll();
+        pollingInterval = setInterval(poll, 5000);
+    }
+
+    function initRealtime() {
+        const echo = window.Echo;
+        if (!echo || !echo.connector) {
+            console.log('Echo not available, using polling only');
+            startPolling();
+            return;
+        }
+
+        const channelName = 'room.' + window.__ROOM_ID;
+        const channel = echo.private(channelName);
+        
+        channel.listen('PlayerJoinedRoom', (e) => {
+            console.log('PlayerJoinedRoom event:', e);
+            addPlayer(e.player ?? e);
+        })
+        .listen('PlayerLeftRoom', (e) => {
+            console.log('PlayerLeftRoom event:', e);
+            removePlayer(e.player ?? e);
+        })
+        .listen('.game.started', (e) => {
+            console.log('Game started event received:', e);
+            if (e.game_url) {
+                window.location.href = e.game_url;
+            }
+        });
+
+        const conn = echo.connector;
+        conn.pusher?.connection?.bind('connected', () => {
+            console.log('WebSocket connected');
+        });
+        
+        conn.pusher?.connection?.bind('disconnected', () => {
+            console.log('WebSocket disconnected, starting polling fallback');
+            if (!pollingInterval) {
+                startPolling();
+            }
+        });
+        
+        conn.pusher?.connection?.bind('error', (err) => {
+            console.error('WebSocket error:', err);
+        });
+        
+        // Start polling as fallback regardless of WebSocket status
+        // This ensures participants will redirect even if WebSocket fails
+        startPolling();
+    }
+
+    renderPlayers();
+    initRealtime();
+})();
+</script>
+@endsection
