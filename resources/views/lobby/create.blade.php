@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-<section class="mx-auto max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6">
-    <h1 class="mb-6 text-3xl font-bold">Create Room</h1>
+<section class="mx-auto max-w-lg rounded-3xl border border-purple-600/30 bg-purple-900/20 p-8 backdrop-blur-sm">
+    <h1 class="mb-6 text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">Buat Ruangan</h1>
     <form method="POST" action="{{ route('rooms.store') }}" class="space-y-4">
         @csrf
-        <label class="block">
-            <span class="text-sm text-slate-300">Room Name</span>
-            <input name="name" value="{{ old('name') }}" required class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400">
-        </label>
-        <label class="block">
-            <span class="text-sm text-slate-300">Max Players</span>
-            <input name="max_players" type="number" min="3" max="12" value="{{ old('max_players', 8) }}" required class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400">
-        </label>
-        <button class="rounded-xl bg-cyan-400 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-300">Create</button>
+        <div class="form-game-group">
+            <label class="form-game-label">Nama Ruangan</label>
+            <input name="name" value="{{ old('name') }}" required class="form-game-input" placeholder="Masukkan nama ruangan...">
+        </div>
+        <div class="form-game-group">
+            <label class="form-game-label">Maks Pemain</label>
+            <input name="max_players" type="number" min="3" max="12" value="{{ old('max_players', 8) }}" required class="form-game-input" placeholder="4-12 pemain">
+        </div>
+        <button class="btn-game btn-primary-game w-full">Buat Ruangan</button>
     </form>
 </section>
 @endsection

@@ -4,10 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\WelcomeController;
 
-Route::get('/', function () {
-    return auth()->check() ? redirect()->route('rooms.index') : redirect()->route('login');
-});
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

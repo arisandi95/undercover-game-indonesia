@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Gaming UI Design System - Undercover Style</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Gaming Purple Palette */
+            --purple-950: #0f0520;
+            --purple-900: #1a0b2e;
+            --purple-800: #2d1b4e;
+            --purple-700: #4c2f7a;
+            --purple-600: #6b46c1;
+            --purple-500: #8b5cf6;
+            --purple-400: #a78bfa;
+            --purple-300: #c4b5fd;
+            
+            /* Neon Accents */
+            --neon-cyan: #00f0ff;
+            --neon-pink: #ff006e;
+            --neon-green: #00ff88;
+            --neon-yellow: #ffea00;
+            --neon-orange: #ff6b35;
+            
+            /* Game Status Colors */
+            --alive: #10b981;
+            --eliminated: #ef4444;
+            --undercover: #f59e0b;
+            --civilian: #3b82f6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.8), 0 0 60px rgba(0, 240, 255, 0.4); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes neonPulse {
+            0%, 100% { text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
+            50% { text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan), 0 0 60px var(--neon-pink); }
+        }
+
+        body {
+            font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif;
+            background: radial-gradient(ellipse at top, var(--purple-900) 0%, var(--purple-950) 50%, #000 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.1) 0%, transparent 50%);
+            animation: pulse 10s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero Gaming Banner */
+        .hero-gaming {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(0, 240, 255, 0.1) 100%);
+            border: 3px solid;
+            border-image: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-cyan)) 1;
+            padding: 4rem 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 3rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .hero-gaming::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(139, 92, 246, 0.03) 2px,
+                rgba(139, 92, 246, 0.03) 4px
+            );
+            animation: float 20s linear infinite;
+        }
+
+        .hero-gaming h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-pink) 50%, var(--neon-yellow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+            animation: neonPulse 3s ease-in-out infinite;
+        }
+
+        .hero-gaming p {
+            font-size: 1.5rem;
+            color: var(--purple-300);
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Game Buttons */
+        .btn-game {
+            padding: 1rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+        }
+
+        .btn-game::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-game:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary-game {
+            background: linear-gradient(135deg, var(--purple-600) 0%, var(--neon-pink) 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+        }
+
+        .btn-primary-game:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 110, 0.8), 0 10px 40px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary-game {
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .btn-secondary-game:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+            transform: translateY(-3px);
+        }
+
+        /* Player Cards */
+        .section-game {
+            background: rgba(26, 11, 46, 0.6);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.6s ease;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .player-card {
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.8) 0%, rgba(15, 5, 32, 0.9) 100%);
+            border: 2px solid var(--purple-600);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .player-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 20px 50px rgba(0, 240, 255, 0.3), 0 0 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .player-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple-600), var(--neon-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .player-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--neon-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .player-status {
+            text-align: center;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+        }
+
+        .status-alive {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--alive);
+            border: 1px solid var(--alive);
+        }
+
+        .status-eliminated {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--eliminated);
+            border: 1px solid var(--eliminated);
+        }
+
+        .player-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neon-yellow);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--purple-300);
+            text-transform: uppercase;
+        }
+
+        /* Achievement Badges */
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .badge {
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .badge::before {
+            content: '⭐';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            transition: left 0.3s ease;
+        }
+
+        .badge:hover::before {
+            left: 10px;
+        }
+
+        .badge:hover {
+            transform: scale(1.1);
+            padding-left: 2.5rem;
+        }
+
+        .badge-legendary {
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-orange));
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+        }
+
+        .badge-epic {
+            background: linear-gradient(135deg, var(--purple-600), var(--neon-cyan));
+            color: white;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .badge-rare {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-yellow));
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            background: rgba(15, 5, 32, 0.8);
+            border: 2px solid var(--purple-600);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .leaderboard-header {
+            background: linear-gradient(135deg, var(--purple-700), var(--purple-900));
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid var(--neon-cyan);
+        }
+
+        .leaderboard-title {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--neon-yellow);
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 234, 0, 0.5);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(139, 92, 246, 0.1);
+            transform: translateX(10px);
+        }
+
+        .leaderboard-rank {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-right: 1.5rem;
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            color: #000;
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.6);
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #cd7f32, #e8a87c);
+            color: #000;
+            box-shadow: 0 0 20px rgba(205, 127, 50, 0.6);
+        }
+
+        .rank-other {
+            background: rgba(139, 92, 246, 0.3);
+            color: var(--purple-300);
+            border: 2px solid var(--purple-600);
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+        }
+
+        .leaderboard-score {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px rgba(255, 234, 0, 0.5);
+        }
+
+        /* Game Stats Panel */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(0, 240, 255, 0.1));
+            border: 2px solid var(--purple-600);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+        }
+
+        .stat-box-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-box-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 20px rgba(255, 234, 0, 0.5);
+        }
+
+        .stat-box-label {
+            font-size: 1rem;
+            color: var(--purple-300);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Game Form */
+        .form-game {
+            background: rgba(15, 5, 32, 0.8);
+            border: 2px solid var(--purple-600);
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+
+        .form-game-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-game-label {
+            display: block;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.875rem;
+        }
+
+        .form-game-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(45, 27, 78, 0.5);
+            border: 2px solid var(--purple-600);
+            border-radius: 0.5rem;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-game-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            background: rgba(45, 27, 78, 0.8);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-gaming h1 {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .player-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Gaming Banner -->
+        <div class="hero-gaming">
+            <h1>🎮 UNDERCOVER</h1>
+            <p>Premium Gaming UI Components</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button class="btn-game btn-primary-game">Play Now</button>
+                <button class="btn-game btn-secondary-game">Join Room</button>
+            </div>
+        </div>
+
+        <!-- Player Cards Section -->
+        <div class="section-game">
+            <h2 class="section-title">👥 Players</h2>
+            <div class="player-grid">
+                <div class="player-card">
+                    <div class="player-avatar">🎭</div>
+                    <div class="player-name">Shadow Hunter</div>
+                    <div class="player-status status-alive">✅ Alive</div>
+                    <div class="player-stats">
+                        <div class="stat">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Wins</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">85%</div>
+                            <div class="stat-label">Win Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-card">
+                    <div class="player-avatar">🕵️</div>
+                    <div class="player-name">Mystery Agent</div>
+                    <div class="player-status status-alive">✅ Alive</div>
+                    <div class="player-stats">
+                        <div class="stat">
+                            <div class="stat-value">8</div>
+                            <div class="stat-label">Wins</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">72%</div>
+                            <div class="stat-label">Win Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-card">
+                    <div class="player-avatar">🎪</div>
+                    <div class="player-name">Phantom</div>
+                    <div class="player-status status-eliminated">❌ Eliminated</div>
+                    <div class="player-stats">
+                        <div class="stat">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Wins</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">60%</div>
+                            <div class="stat-label">Win Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievement Badges -->
+        <div class="section-game">
+            <h2 class="section-title">🏆 Achievements</h2>
+            <div class="badge-container">
+                <div class="badge badge-legendary">🔥 Master Detective</div>
+                <div class="badge badge-epic">💎 Perfect Game</div>
+                <div class="badge badge-rare">⚡ Speed Runner</div>
+                <div class="badge badge-legendary">👑 Champion</div>
+                <div class="badge badge-epic">🎯 Sharp Eye</div>
+                <div class="badge badge-rare">🌟 Rising Star</div>
+            </div>
+        </div>
+
+        <!-- Game Stats -->
+        <div class="section-game">
+            <h2 class="section-title">📊 Game Statistics</h2>
+            <div class="stats-panel">
+                <div class="stat-box">
+                    <div class="stat-box-icon">🎮</div>
+                    <div class="stat-box-value">247</div>
+                    <div class="stat-box-label">Games Played</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-icon">🏆</div>
+                    <div class="stat-box-value">156</div>
+                    <div class="stat-box-label">Victories</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-icon">⚡</div>
+                    <div class="stat-box-value">63%</div>
+                    <div class="stat-box-label">Win Rate</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-icon">🔥</div>
+                    <div class="stat-box-value">12</div>
+                    <div class="stat-box-label">Win Streak</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="section-game">
+            <h2 class="section-title">🏅 Leaderboard</h2>
+            <div class="leaderboard">
+                <div class="leaderboard-header">
+                    <div class="leaderboard-title">Top Players</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank rank-1">1</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">🎭 Shadow Master</div>
+                    </div>
+                    <div class="leaderboard-score">2,450</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank rank-2">2</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">🕵️ Detective Pro</div>
+                    </div>
+                    <div class="leaderboard-score">2,180</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank rank-3">3</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">🎪 Mystery King</div>
+                    </div>
+                    <div class="leaderboard-score">1,920</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank rank-other">4</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">👤 Silent Hunter</div>
+                    </div>
+                    <div class="leaderboard-score">1,750</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank rank-other">5</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">🎯 Sharp Eye</div>
+                    </div>
+                    <div class="leaderboard-score">1,620</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Form -->
+        <div class="section-game">
+            <h2 class="section-title">🎲 Create Room</h2>
+            <div class="form-game">
+                <div class="form-game-group">
+                    <label class="form-game-label">Room Name</label>
+                    <input type="text" class="form-game-input" placeholder="Enter room name...">
+                </div>
+                <div class="form-game-group">
+                    <label class="form-game-label">Max Players</label>
+                    <input type="number" class="form-game-input" placeholder="4-10 players" min="4" max="10">
+                </div>
+                <div class="form-game-group">
+                    <label class="form-game-label">Game Mode</label>
+                    <select class="form-game-input">
+                        <option>Classic Mode</option>
+                        <option>Speed Mode</option>
+                        <option>Expert Mode</option>
+                    </select>
+                </div>
+                <button class="btn-game btn-primary-game" style="width: 100%; margin-top: 1rem;">Create Room</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add floating animation to stat boxes
+        document.querySelectorAll('.stat-box').forEach((box, index) => {
+            box.style.animationDelay = `${index * 0.2}s`;
+        });
+
+        // Add entrance animation to player cards
+        document.querySelectorAll('.player-card').forEach((card, index) => {
+            card.style.animation = `fadeIn 0.6s ease ${index * 0.1}s both`;
+        });
+
+        // Add entrance animation to leaderboard items
+        document.querySelectorAll('.leaderboard-item').forEach((item, index) => {
+            item.style.animation = `slideIn 0.5s ease ${index * 0.1}s both`;
+        });
+    </script>
+</body>
+</html>
