@@ -26,45 +26,45 @@ window.__ROOM_HOST_ID = {{ $room->host_id }};
 window.__ROOM_ID = {{ $room->id }};
 </script>
 <section class="grid gap-6 lg:grid-cols-[1fr_320px]">
-    <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+    <div class="rounded-3xl border border-purple-600/30 bg-purple-900/20 p-6 backdrop-blur-sm">
         <div class="flex flex-col justify-between gap-4 md:flex-row md:items-start">
             <div>
-                <h1 class="text-3xl font-black">{{ $room->name }}</h1>
-                <p class="mt-2 text-slate-400">Hosted by {{ $room->host->username }} · {{ str_replace('_', ' ', $room->status) }}</p>
+                <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{{ $room->name }}</h1>
+                <p class="mt-2 text-purple-300">Hosted by {{ $room->host->username }} · {{ str_replace('_', ' ', $room->status) }}</p>
             </div>
             @if ($game && $room->status !== 'waiting')
-                <a href="{{ route('games.show', $game) }}" class="rounded-xl bg-cyan-400 px-4 py-2 font-bold text-slate-950">Enter Game</a>
+                <a href="{{ route('games.show', $game) }}" class="btn-game btn-primary-game">Enter Game</a>
             @endif
         </div>
 
         <div id="room-players" class="mt-8 grid gap-3 sm:grid-cols-2">
             @foreach ($initialPlayers as $player)
-                <div class="rounded-xl border border-slate-800 bg-slate-950 p-4" data-player-id="{{ $player['user_id'] }}">
-                    <p class="font-semibold">{{ $player['user']['username'] }}</p>
-                    <p class="text-sm text-slate-500">{{ $player['is_host'] ? 'Host' : 'Player' }}</p>
+                <div class="player-card" data-player-id="{{ $player['user_id'] }}">
+                    <p class="font-semibold text-cyan-300">{{ $player['user']['username'] }}</p>
+                    <p class="text-sm text-purple-400">{{ $player['is_host'] ? 'Host' : 'Pemain' }}</p>
                 </div>
             @endforeach
         </div>
 
-        <div id="room-players-empty" class="mt-8 hidden text-center text-slate-500">
-            <p>Waiting for players to join...</p>
+        <div id="room-players-empty" class="mt-8 hidden text-center text-purple-400">
+            <p>Menunggu pemain bergabung...</p>
         </div>
     </div>
 
-    <aside class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-        <h2 class="text-xl font-bold">Actions</h2>
+    <aside class="rounded-3xl border border-purple-600/30 bg-purple-900/20 p-6 backdrop-blur-sm">
+        <h2 class="text-xl font-bold text-cyan-300">Tindakan</h2>
         <div class="mt-5 space-y-3">
             @if ($room->status === 'waiting')
                 @if (!$game?->players?->contains('user_id', auth()->id()))
-                    <form method="POST" action="{{ route('rooms.join', $room) }}">@csrf<button class="w-full rounded-xl bg-cyan-400 px-4 py-3 font-bold text-slate-950">Join Room</button></form>
+                    <form method="POST" action="{{ route('rooms.join', $room) }}">@csrf<button class="btn-game btn-primary-game w-full">Gabung Ruangan</button></form>
                 @endif
                 @if ($room->host_id === auth()->id())
-                    <form method="POST" action="{{ route('games.store', $room) }}">@csrf<button class="w-full rounded-xl bg-emerald-400 px-4 py-3 font-bold text-slate-950">Start Game</button></form>
+                    <form method="POST" action="{{ route('games.store', $room) }}">@csrf<button class="btn-game btn-secondary-game w-full">Mulai Game</button></form>
                 @endif
             @endif
-            <form method="POST" action="{{ route('rooms.leave', $room) }}">@csrf<button class="w-full rounded-xl border border-slate-700 px-4 py-3 font-bold text-slate-200">Leave Room</button></form>
+            <form method="POST" action="{{ route('rooms.leave', $room) }}">@csrf<button class="rounded-xl border border-purple-600/50 px-4 py-3 font-bold text-purple-300 w-full">Keluar Ruangan</button></form>
             @if ($room->host_id === auth()->id())
-                <form method="POST" action="{{ route('rooms.destroy', $room) }}">@csrf @method('DELETE')<button class="w-full rounded-xl border border-red-800 px-4 py-3 font-bold text-red-300">Delete Room</button></form>
+                <form method="POST" action="{{ route('rooms.destroy', $room) }}">@csrf @method('DELETE')<button class="rounded-xl border border-red-500/50 px-4 py-3 font-bold text-red-300 w-full">Hapus Ruangan</button></form>
             @endif
         </div>
     </aside>
@@ -93,9 +93,9 @@ window.__ROOM_ID = {{ $room->id }};
 
     function renderPlayers() {
         playersContainer.innerHTML = currentPlayers.map((player) => `
-            <div class="rounded-xl border border-slate-800 bg-slate-950 p-4" data-player-id="${player.user_id}">
-                <p class="font-semibold">${escapeHtml(player.user.username)}</p>
-                <p class="text-sm text-slate-500">${player.is_host ? 'Host' : 'Player'}</p>
+            <div class="player-card" data-player-id="${player.user_id}">
+                <p class="font-semibold text-cyan-300">${escapeHtml(player.user.username)}</p>
+                <p class="text-sm text-purple-400">${player.is_host ? 'Host' : 'Pemain'}</p>
             </div>
         `).join('');
 
@@ -176,7 +176,6 @@ window.__ROOM_ID = {{ $room->id }};
             })
             .catch(() => {});
             
-            // Also check room status for game start
             checkRoomStatus();
         };
 
@@ -226,8 +225,6 @@ window.__ROOM_ID = {{ $room->id }};
             console.error('WebSocket error:', err);
         });
         
-        // Start polling as fallback regardless of WebSocket status
-        // This ensures participants will redirect even if WebSocket fails
         startPolling();
     }
 
